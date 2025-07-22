@@ -21,6 +21,8 @@ class ASYNC_SERIAL : public ASYNC_BUFFER <fifo_size> {
     void set_baudrate(unsigned long baudrate);
 
     void Read_Port();
+	
+	void Enviar_Mensaje(const char * new_msj);
 
     private:
     HardwareSerial & serial;
@@ -51,5 +53,10 @@ void ASYNC_SERIAL<fifo_size>::Read_Port( ){
     ASYNC_BUFFER<fifo_size>::Update_Buffer(buffer);
 }
 
+
+template<int fifo_size>
+void ASYNC_SERIAL<fifo_size>::Enviar_Mensaje(const char * new_msj){
+    serial.println(new_msj);
+}
 
 #endif
