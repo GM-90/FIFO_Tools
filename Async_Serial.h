@@ -5,10 +5,7 @@
 #include "Async_Buffer.h"
 #include <Arduino.h>
 
-//Tamanio del Buffer donde se acumulan los datos recibidos
-// del puerto Serie a la espera de ser extraidos los mensajes enteros
-// y colocados en la FIFO.
-#define READ_BUFFER_SIZE    200
+
 
 template<int fifo_size>
 class ASYNC_SERIAL : public ASYNC_BUFFER <fifo_size> {
