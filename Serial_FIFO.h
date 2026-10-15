@@ -59,7 +59,6 @@ void SERIAL_FIFO<fifo_size>::Read_Port( ){
         if (datos_pendientes) {
             if (!Rx_Data.available()) {
                 datos_pendientes=false;
-                Serial1.println("** FIN **");
             }
         }
     }
