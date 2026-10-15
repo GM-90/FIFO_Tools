@@ -18,10 +18,9 @@ class SERIAL_FIFO {
     bool Mensajes_Pendientes();
 
     //Indica la precencia de datos recibidos todavia a la espera de ser procesados.
-    //bool Datos_Pendientes();
+    bool Datos_Pendientes();
 
-    void Retirar_Mensaje(char * new_msj, size_t new_msj_tam);
-	
+    void Retirar_Mensaje(char * new_msj, size_t new_msj_tam);	
 	
 	private:
 	HardwareSerial & serial;
@@ -29,6 +28,7 @@ class SERIAL_FIFO {
 	STRING_FIFO<fifo_size> Rx_Data;
     unsigned int TS_last_char=0;
     bool incoming_data=false;
+    bool datos_pendientes=false;
 };
 
 
@@ -38,22 +38,32 @@ void SERIAL_FIFO<fifo_size>::Read_Port( ){
     if (serial.available()) {
         do {
             char c = serial.read();
-            incoming_data=true;
-            Rx_Data.push_char(c);
-            if (c=='\n') {
-                Rx_Data.Close_string();
-                incoming_data=false;
+            if (c!='\0') {
+                incoming_data=true;
+                datos_pendientes=true;
+                Rx_Data.push_char(c);
+                if (c=='\n') {
+                    Rx_Data.Close_string();
+                    incoming_data=false;
+                }
             }
         } while (serial.available());
         TS_last_char = millis() ;
+    } else {
+        if (incoming_data) {
+            if ((millis()-TS_last_char)>=50){
+                Rx_Data.Close_string();
+                incoming_data=false;
+            } 
+        }
+        if (datos_pendientes) {
+            if (!Rx_Data.available()) {
+                datos_pendientes=false;
+                Serial1.println("** FIN **");
+            }
+        }
     }
-    if (incoming_data) {
-        if ((millis()-TS_last_char)>=50){
-            Rx_Data.Close_string();
-            incoming_data=false;
-        } 
-    }
-	
+    
 }
 
 template<int fifo_size>
@@ -66,5 +76,9 @@ void SERIAL_FIFO<fifo_size>::Retirar_Mensaje(char * new_msj, size_t new_msj_tam)
     Rx_Data.FIFO_Read(new_msj,new_msj_tam);
 }
 
+template<int fifo_size>
+bool SERIAL_FIFO<fifo_size>::Datos_Pendientes(){
+    return datos_pendientes;
+}
 
 #endif
